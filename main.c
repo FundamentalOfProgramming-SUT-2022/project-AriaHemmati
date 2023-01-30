@@ -8,10 +8,19 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define Kill printf("Invalid Response")
+typedef long long           ll;
+typedef long double         ld;
+
+#define F               first
+#define S               second
+#define INVALID         printf("Invalid Command")
+#define N               (int)1e2 + 10
+
+char command[N];
 
 int main()
 {
-    Kill;
+    printf("Ariya's VIM   Powered by ~Kc~\n");
+    
     return 0;
 }
