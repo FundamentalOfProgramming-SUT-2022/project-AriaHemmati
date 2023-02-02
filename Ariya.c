@@ -152,7 +152,16 @@ void Go_Main()
 
 void Go_Path(char* s)
 {
-    
+    Go_Main();
+    cur = strtok(s, "/");
+    while(cur != NULL)
+    {
+        mkdir(cur, S_IRWXU);
+        chdir(cur);
+        cur = strtok(NULL, "/");
+    }
+    printf("Go path checking\n");
+    print_cwd();
 }
 
 int Valid(char* s)
@@ -165,6 +174,7 @@ int exist_path(char* s)
     FILE *f = fopen(s, "r");
     if(f != NULL)
     {
+        printf("this file already exists\n");
         fclose(f);
         return 1;
     }
@@ -173,7 +183,27 @@ int exist_path(char* s)
 
 void createfile()
 {
-
+    if(exist_path(path)) return;
+    if(!Valid(path))
+    {
+        INVALID;
+        return;
+    }
+    int ptr = SZ(path);
+    for(; ptr >= 0; ptr --)
+    {
+        if(path[ptr] == '/')
+        {
+            break;
+        }
+    }
+    char* DIR = PRE(ptr, path);
+    char* NAME_OF_FILE = SUF(SZ(path) - ptr - 1, path);
+    printf("%s %s\n", DIR, NAME_OF_FILE);
+    Go_Path(DIR);
+    FILE *f = fopen(NAME_OF_FILE, "w+");
+    fclose(f);
+    Go_Main();
 }
 
 /// Digesting the input to known elements
