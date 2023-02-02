@@ -140,12 +140,11 @@ void print_cwd()
 
 void Go_Main()
 {
-    printf("here\n");
     int sz = GET();
-    while(sz > SZ(Main))
+    while(sz > Main_sz)
     {
-        print_cwd();
-        FLUSH;
+        /*print_cwd();
+        FLUSH;*/
         chdir("..");
         sz = GET();
     }
@@ -153,7 +152,7 @@ void Go_Main()
 
 void Go_Path(char* s)
 {
-
+    
 }
 
 int Valid(char* s)
@@ -260,11 +259,6 @@ void Digest()
 int main()
 {
     Main_sz = GET();
-    printf("%s\n", Main);
-    chdir("root");
-    print_cwd();
-    Go_Main();
-    print_cwd();
     printf("Ariya's VIM   Powered by ~Kc~\n");
     do
     {
