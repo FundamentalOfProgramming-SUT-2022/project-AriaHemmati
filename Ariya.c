@@ -377,25 +377,79 @@ void find()
         INVALID;
         return;
     }
+    ///printf("just checking all = %d at = %d cnt = %d byword = %d str = %s\n", all, at, cnt, byword, str);
     char s[N2] = {"\0"};
     READ(s, Path);
     int arr[N] = {0};
-    int n = SZ(str);
+    int ans[N] = {0};
+    int ptr = 0, n = SZ(str);
     for(int i = 1; i < n; i ++)
     {
         arr[i] = arr[i - 1];
-        while(str[arr[i]] != str[i])
+        while(arr[i] && str[arr[i]] != str[i])
         {
-            arr[i] = arr[arr[i]];
+            arr[i] = arr[arr[i] - 1];
         }
-        arr[i] += (str[arr[i]] == str[i]);
+        arr[i] += (int)(str[arr[i]] == str[i]);
     }
-    printf("checking\n");
+    /*printf("checking\n");
     for(int i = 0; i < n; i ++)
     {
         printf("%d ", arr[i]);
     }
-    printf("\n");
+    printf("\n");*/
+    int Words = 0, flag = 0, j = 0;
+    for(int i = 0; i < SZ(s); i ++)
+    {
+        while(j && str[j] != s[i])
+        {
+            j = arr[j - 1];
+        }
+        j += (int)(str[j] == s[i]);
+        if(j == SZ(str))
+        {
+            ans[ptr ++] = (byword ? Words : i);
+            j = 0;
+        }
+        if(s[i] != ' ' && s[i] != '\n')
+        {
+            flag = 1;
+        }
+        else
+        {
+            if(flag) Words ++;
+            flag = 0;
+        }
+    }
+    if(cnt)
+    {
+        printf("Count : %d\n", ptr);
+    }
+    if(at)
+    {
+        if(at > ptr)
+        {
+            printf("not enough matches :(  -1\n");
+        }
+        else
+        {
+            printf("%d\n", ans[at - 1]);
+        }
+        return;
+    }
+    if(all)
+    {
+        for(int i = 0; i < ptr; i ++)
+        {
+            printf("%d", ans[i]);
+            if(i + 1 != ptr)
+            {
+                printf(", ");
+            }
+        }
+        printf("\n");
+    }
+    return;
 }
 
 /// Digesting the input to known elements

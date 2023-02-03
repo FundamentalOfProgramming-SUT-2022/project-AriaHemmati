@@ -13,4 +13,8 @@ copystr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
 
 cutstr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
 
-pastestr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
+pastestr -file /root/dir1/dir2/file.txt -pos 2:5
+
+find -str "a" -file /root/dir1/dir2/file.txt -all -byword
+
+find -str "a" -file /root/dir1/dir2/file.txt -at 6
