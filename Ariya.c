@@ -194,8 +194,8 @@ void Go_Path(char* s)
         chdir(cur);
         cur = strtok(NULL, "/");
     }
-    printf("Go path checking\n");
-    print_cwd();
+    ///printf("Go path checking\n");
+    ///print_cwd();
 }
 
 int Valid(char* s)
@@ -211,7 +211,7 @@ int exist_path(char* s)
         fclose(f);
         return 1;
     }
-    printf("here s = %s\n", s);
+    ///printf("here s = %s\n", s);
     return 0;
 }
 
@@ -236,13 +236,13 @@ void createfile()
         }
     }
     char* DIR = PRE(ptr, path);
+    char* DIR2 = PRE(ptr, path);
     char* NAME_OF_FILE = SUF(SZ(path) - ptr - 1, path);
-    printf("%s %s\n", DIR, NAME_OF_FILE);
     Go_Path(DIR);
     FILE *f = fopen(NAME_OF_FILE, "w+");
     fclose(f);
     Go_Main();
-    Go_Path(CLONE(DIR));
+    Go_Path(CLONE(DIR2));
     FILE *f2 = fopen(NAME_OF_FILE, "w+");
     fclose(f2);
     Go_Main();
