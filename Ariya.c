@@ -261,8 +261,6 @@ void insertstr()
 {
     if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || str == NULL)
     {
-        /*printf("path = %s x = %d y = %d str = %s\n", path, x, y, str);
-        printf("oh no\n");*/
         INVALID;
         return;
     }
@@ -274,6 +272,51 @@ void insertstr()
     strcat(ret, str);
     strcat(ret, SUF(SZ(s) - Ind, s));
     FILE* f = fopen(FIX2(path), "w");
+    fputs(ret, f);
+    fclose(f);
+}
+
+/// cat
+
+void cat()
+{
+    if(!Valid(path) || !exist_path(path))
+    {
+        INVALID;
+        return;
+    }
+    char s[N2] = {"\0"};
+    READ(s, FIX2(path));
+    printf("%s\n", s);
+}
+
+/// removestr
+
+void removestr()
+{
+    char* Path = FIX2(path);
+    if(!(Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1))
+    {
+        INVALID;
+        return;
+    }
+    printf("Im here!\n");
+    if(SIZE == 0) return;
+    char s[N2] = {"\0"};
+    READ(s, Path);
+    int Ind = Index(s, x - 1, y);
+    Ass(0 <= Ind + (SIZE - 1) * dir && Ind + (SIZE - 1) * dir < SZ(s));
+    int l = Ind + (SIZE - 1) * dir, r = Ind;
+    if(l > r) /// swap
+    {
+        int mid = r;
+        r = l;
+        l = mid;
+    }
+    char ret[N2] = {"\0"};
+    strcat(ret, PRE(l, s));
+    strcat(ret, SUF(SZ(s) - r - 1, s));
+    FILE* f = fopen(Path, "w");
     fputs(ret, f);
     fclose(f);
 }
@@ -335,10 +378,29 @@ int _size()
     return 0;
 }
 
+int _flag()
+{
+    if(SZ(FIX(cur)) == 1)
+    {
+        char* idk = FIX(cur);
+        if(idk[0] == 'b')
+        {
+            dir = -1;
+        }
+        if(idk[0] == 'f')
+        {
+            dir = 1;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 void Digest()
 {
     cur = str = path = command = NULL;
-    dir = x = y = SIZE = -1;
+    dir = 0;
+    x = y = SIZE = -1;
     cur = strtok(Input, "-");
     command = cur;
     command[SZ(cur) - 1] = '\0';
@@ -347,27 +409,22 @@ void Digest()
     {
         /*printf("now cur is : %s\n", cur);
         FLUSH;*/
-        if(!(_file() || _size() || _pos() || _str()))
+        if(!(_file() || _size() || _pos() || _str() || _flag()))
         {
             INVALID;
             break;
         }
         cur = strtok(NULL, "-");
     }
-    /*printf("path = %s str = %s command = %s x = %d y = %d SIZE = %d\n", path, str, command, x, y, SIZE);
-    FLUSH;*/
+    printf("path = %s str = %s command = %s x = %d y = %d SIZE = %d dir = %d\n", path, str, command, x, y, SIZE, dir);
+    FLUSH;
 }
+
 
 int main()
 {
     Main_sz = GET();
     printf("Ariya's VIM   Powered by ~Kc~\n");
-    FILE *f = fopen("root/dir1/dir2/file.txt", "r");
-    if(f == NULL)
-    {
-        printf("Oh no\n");
-        return 0;
-    }
     do
     {
         printf("> ");
@@ -385,11 +442,11 @@ int main()
         } 
         else if (E(command, "cat"))
         {
-            // cat();
+            cat();
         }
-        else if (E(command, "removetstr"))
+        else if (E(command, "removestr"))
         {
-            // removestr();
+            removestr();
         }
         else if (E(command, "copy"))
         {
@@ -411,6 +468,6 @@ int main()
         {
             // INVALID;
         }
-    } while (strcmp(Input, "exit"));
+    } while (E(command, "exit"));
     return 0;
 }
