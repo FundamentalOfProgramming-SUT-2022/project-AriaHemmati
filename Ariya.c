@@ -113,6 +113,14 @@ char* FIX2(char* s)
     return s;
 }
 
+char* CLONE(char* s)
+{
+    char* ret = calloc(SZ(s) + 6, sizeof (char));
+    strcat(ret, "clone");
+    strcat(ret, s);
+    return ret;
+}
+
 int TO_INT(char* s)
 {
     int n = SZ(s);
@@ -234,6 +242,10 @@ void createfile()
     FILE *f = fopen(NAME_OF_FILE, "w+");
     fclose(f);
     Go_Main();
+    Go_Path(CLONE(DIR));
+    FILE *f2 = fopen(NAME_OF_FILE, "w+");
+    fclose(f2);
+    Go_Main();
 }
 
 /// insert
@@ -267,6 +279,9 @@ void insertstr()
     char s[N2] = {"\0"};
     char ret[N2] = {"\0"};
     READ(s, FIX2(path));
+    FILE *cl = fopen(CLONE(path), "w");
+    fputs(s, cl);
+    fclose(cl);
     int Ind = Index(s, x - 1, y);
     strcat(ret, PRE(Ind, s));
     strcat(ret, str);
@@ -295,7 +310,7 @@ void cat()
 void removestr()
 {
     char* Path = FIX2(path);
-    if(!(Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1))
+    if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1)
     {
         INVALID;
         return;
@@ -303,6 +318,9 @@ void removestr()
     if(SIZE == 0) return;
     char s[N2] = {"\0"};
     READ(s, Path);
+    FILE *cl = fopen(CLONE(path), "w");
+    fputs(s, cl);
+    fclose(cl);
     int Ind = Index(s, x - 1, y);
     Ass(0 <= Ind + (SIZE - 1) * dir && Ind + (SIZE - 1) * dir < SZ(s));
     int l = Ind + (SIZE - 1) * dir, r = Ind;
@@ -325,7 +343,7 @@ void removestr()
 void copystr()
 {
     char* Path = FIX2(path);
-    if(!(Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1))
+    if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1)
     {
         INVALID;
         return;
@@ -356,7 +374,7 @@ void cutstr()
 void pastestr()
 {
     char* Path = FIX2(path);
-    if(!(Valid(path) || !exist_path(path) || x == -1 || y == -1))
+    if(!Valid(path) || !exist_path(path) || x == -1 || y == -1)
     {
         INVALID;
         return;
@@ -367,7 +385,7 @@ void pastestr()
     insertstr();
 }
 
-/// find, replace
+/// find, replace, undo
 
 void find()
 {
@@ -381,7 +399,7 @@ void find()
     char s[N2] = {"\0"};
     READ(s, Path);
     int arr[N] = {0};
-    int ans[N] = {0};
+    int ans[N] = {-1};
     int ptr = 0, n = SZ(str);
     for(int i = 1; i < n; i ++)
     {
@@ -392,12 +410,6 @@ void find()
         }
         arr[i] += (int)(str[arr[i]] == str[i]);
     }
-    /*printf("checking\n");
-    for(int i = 0; i < n; i ++)
-    {
-        printf("%d ", arr[i]);
-    }
-    printf("\n");*/
     int Words = 0, flag = 0, j = 0;
     for(int i = 0; i < SZ(s); i ++)
     {
@@ -450,6 +462,79 @@ void find()
         printf("\n");
     }
     return;
+}
+
+void replace()
+{
+    char* Path = FIX2(path);
+    if(!(Valid(path) || !exist_path(path) || str == NULL || str2 == NULL))
+    {
+        INVALID;
+        return;
+    }
+    char s[N2] = {"\0"};
+    READ(s, Path);
+    FILE *cl = fopen(CLONE(path), "w");
+    fputs(s, cl);
+    fclose(cl);
+    int arr[N] = {0};
+    int ptr = 0, n = SZ(str);
+    for(int i = 1; i < n; i ++)
+    {
+        arr[i] = arr[i - 1];
+        while(arr[i] && str[arr[i]] != str[i])
+        {
+            arr[i] = arr[arr[i] - 1];
+        }
+        arr[i] += (int)(str[arr[i]] == str[i]);
+    }
+    int j = 0;
+    char* ret = calloc(N2 + 1, sizeof (char));
+    for(int i = 0; i < N2; i ++)
+    {
+        ret[i] = '\0';
+    }
+    for(int i = 0; i < SZ(s); i ++)
+    {
+        strncat(ret, &s[i], 1);
+        while(j && str[j] != s[i])
+        {
+            j = arr[j - 1];
+        }
+        j += (int)(str[j] == s[i]);
+        if(j == SZ(str))
+        {
+            ptr ++;
+            if(ptr == at || all)
+            {
+                for(int k = 0; k < SZ(str); k ++)
+                {
+                    ret[SZ(ret) - 1] = '\0';
+                }
+                strcat(ret, str2);
+            }
+            j = 0;
+        }
+    }
+    FLUSH;
+    FILE *f = fopen(Path, "w");
+    fputs(ret, f);
+    fclose(f);
+}
+
+void undo()
+{
+    char* Path = FIX2(path);
+    if(!Valid(path) || !exist_path(path))
+    {
+        INVALID;
+        return;
+    }
+    char s[N2] = {"/0"};
+    READ(s, CLONE(path));
+    FILE *f = fopen(Path, "w");
+    fputs(s, f);
+    fclose(f);
 }
 
 /// Digesting the input to known elements
@@ -643,25 +728,25 @@ int main()
         }
         else if (E(command, "replace"))
         {
-            // replace()
+            replace();
         }
         else if (E(command, "grep"))
         {
-            // grep()
+            // grep();
         }
         else if (E(command, "undo"))
         {
-            // undo();
+            undo();
         }
         else if (E(command, "auto"))
         {
             // auto();
         }
-        else if (E(PRE(7, Input), "compare"))
+        else if (E(PRE(7, command), "compare"))
         {
             // Compare();
         }
-        else if (E(command, "exit"))
+        else if (E(command, "exi"))
         {
             break;
         }
