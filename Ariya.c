@@ -15,6 +15,7 @@ typedef long double         ld;
 #define S               second
 #define INVALID         printf("Invalid Command\n")
 #define N               (int)1e2 + 10
+#define N2              (int)1e3 + 10
 #define FLUSH           fflush(stdout)
 #define SZ(x)           (int)strlen(x)
 
@@ -103,6 +104,15 @@ char* FIX(char* s)
     return BAZE(l, r, s);
 }
 
+char* FIX2(char* s)
+{
+    if(s[0] == '/')
+    {
+        return SUF(SZ(s) - 1, s);
+    }
+    return s;
+}
+
 int TO_INT(char* s)
 {
     int n = SZ(s);
@@ -114,6 +124,22 @@ int TO_INT(char* s)
         ret += (int)(s[i] - '0');
     }
     return ret;
+}
+
+void READ(char* s, char* path)
+{
+    FILE* f = fopen(path, "r");
+    char c;
+    while(1)
+    {
+        c = fgetc(f);
+        if(c == EOF)
+        {
+            break;
+        }
+        s[SZ(s)] = c;
+    }
+    fclose(f);
 }
 
 /// global variables unkown to the basic functions above
@@ -170,23 +196,27 @@ int Valid(char* s)
 }
 
 int exist_path(char* s)
-{
-    FILE *f = fopen(s, "r");
-    if(f != NULL)
+{    
+    FILE *f;
+    if((f = fopen(FIX2(s), "r")))
     {
-        printf("this file already exists\n");
         fclose(f);
         return 1;
     }
+    printf("here s = %s\n", s);
     return 0;
 }
 
 void createfile()
 {
-    if(exist_path(path)) return;
     if(!Valid(path))
     {
         INVALID;
+        return;
+    }
+    if(exist_path(path))
+    {
+        printf("this file already exists\n");
         return;
     }
     int ptr = SZ(path);
@@ -204,6 +234,48 @@ void createfile()
     FILE *f = fopen(NAME_OF_FILE, "w+");
     fclose(f);
     Go_Main();
+}
+
+/// insert
+
+int Index(char* s, int A, int B)
+{
+    int ptr = 0;
+    while(ptr < SZ(s) && (A || B))
+    {
+        if(s[ptr] == '\n')
+        {
+            A --;
+            Ass(A >= 0);
+        }
+        else if(A == 0)
+        {
+            B --;
+        }
+        ptr ++;
+    }
+    return ptr;
+}
+
+void insertstr()
+{
+    if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || str == NULL)
+    {
+        /*printf("path = %s x = %d y = %d str = %s\n", path, x, y, str);
+        printf("oh no\n");*/
+        INVALID;
+        return;
+    }
+    char s[N2] = {"\0"};
+    char ret[N2] = {"\0"};
+    READ(s, FIX2(path));
+    int Ind = Index(s, x - 1, y);
+    strcat(ret, PRE(Ind, s));
+    strcat(ret, str);
+    strcat(ret, SUF(SZ(s) - Ind, s));
+    FILE* f = fopen(FIX2(path), "w");
+    fputs(ret, f);
+    fclose(f);
 }
 
 /// Digesting the input to known elements
@@ -290,6 +362,12 @@ int main()
 {
     Main_sz = GET();
     printf("Ariya's VIM   Powered by ~Kc~\n");
+    FILE *f = fopen("root/dir1/dir2/file.txt", "r");
+    if(f == NULL)
+    {
+        printf("Oh no\n");
+        return 0;
+    }
     do
     {
         printf("> ");
@@ -303,7 +381,7 @@ int main()
         }
         else if (E(command, "insertstr"))
         {
-            // insertstr();
+            insertstr();
         } 
         else if (E(command, "cat"))
         {
