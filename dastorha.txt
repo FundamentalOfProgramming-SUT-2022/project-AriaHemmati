@@ -1,0 +1,16 @@
+createfile -file /root/dir1/dir2/file.txt -pos 100:17 -str "Hello I'm Here" -str "Hello I've Here" -size 17824
+
+
+createfile -file /root/dir1/dir2/file.txt
+
+insertstr -file /root/dir1/dir2/file.txt -str "Hello World!" -pos 2:5 
+
+cat -file /root/dir1/dir2/file.txt
+
+removestr -file /root/dir1/dir2/file.txt -pos 2:5 -size 4 -b
+
+copystr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
+
+cutstr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
+
+pastestr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b

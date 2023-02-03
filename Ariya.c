@@ -146,9 +146,9 @@ void READ(char* s, char* path)
 
 int Main_sz;
 
-char *cur, *command, *path, *str;
+char *cur, *command, *path, *str, *str2;
 
-int x, y, dir, SIZE;
+int at, all, byword, cnt, x, y, dir, SIZE;
 
 /// Working with Directory and CWD
 
@@ -300,7 +300,6 @@ void removestr()
         INVALID;
         return;
     }
-    printf("Im here!\n");
     if(SIZE == 0) return;
     char s[N2] = {"\0"};
     READ(s, Path);
@@ -321,6 +320,84 @@ void removestr()
     fclose(f);
 }
 
+/// copy paste cut
+
+void copystr()
+{
+    char* Path = FIX2(path);
+    if(!(Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1))
+    {
+        INVALID;
+        return;
+    }
+    char s[N2] = {"\0"};
+    READ(s, Path);
+    int Ind = Index(s, x - 1, y);
+    Ass(0 <= Ind + (SIZE - 1) * dir && Ind + (SIZE - 1) * dir < SZ(s));
+    int l = Ind + (SIZE - 1) * dir, r = Ind;
+    if(l > r) /// swap
+    {
+        int mid = r;
+        r = l;
+        l = mid;
+    }
+    char* ret = BAZE(l, r, s);
+    FILE *f = fopen("Clip.txt", "w");
+    fputs(ret, f);
+    fclose(f);
+}
+
+void cutstr()
+{
+    copystr();
+    removestr();
+}
+
+void pastestr()
+{
+    char* Path = FIX2(path);
+    if(!(Valid(path) || !exist_path(path) || x == -1 || y == -1))
+    {
+        INVALID;
+        return;
+    }
+    char* s = calloc(N2, sizeof (char));
+    READ(s, "Clip.txt");
+    str = s;
+    insertstr();
+}
+
+/// find, replace
+
+void find()
+{
+    char* Path = FIX2(path);
+    if(!(Valid(path) || !exist_path(path) || str == NULL))
+    {
+        INVALID;
+        return;
+    }
+    char s[N2] = {"\0"};
+    READ(s, Path);
+    int arr[N] = {0};
+    int n = SZ(str);
+    for(int i = 1; i < n; i ++)
+    {
+        arr[i] = arr[i - 1];
+        while(str[arr[i]] != str[i])
+        {
+            arr[i] = arr[arr[i]];
+        }
+        arr[i] += (str[arr[i]] == str[i]);
+    }
+    printf("checking\n");
+    for(int i = 0; i < n; i ++)
+    {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
 /// Digesting the input to known elements
 
 int _file()
@@ -338,6 +415,18 @@ int _file()
 
 int _str()
 {
+    if(SZ(cur) >= 4 && E(PRE(4, cur), "str1"))
+    {
+        cur += 4;
+        str = FIX(cur);
+        return 1;
+    }
+    if(SZ(cur) >= 4 && E(PRE(4, cur), "str2"))
+    {
+        cur += 4;
+        str2 = FIX(cur);
+        return 1;
+    }
     if(SZ(cur) >= 3 && E(PRE(3, cur), "str"))
     {
         cur += 3;
@@ -396,10 +485,39 @@ int _flag()
     return 0;
 }
 
+int _atallbyword()
+{
+    if(SZ(cur) >= 3)
+    {
+        if(E(PRE(2, cur), "at"))
+        {
+            cur += 2;
+            at = TO_INT(FIX(cur));
+            return 1;
+        }
+        if(E(PRE(3, cur), "all"))
+        {
+            all = 1;
+            return 1;
+        }
+    }
+    if(SZ(cur) >= 5 && E(PRE(5, cur), "count"))
+    {
+        cnt = 1;
+        return 1;
+    }
+    if(SZ(cur) >= 6 && E(PRE(6, cur), "byword"))
+    {
+        byword = 1;
+        return 1;
+    }
+    return 0;
+}
+
 void Digest()
 {
-    cur = str = path = command = NULL;
-    dir = 0;
+    cur = str = str2 = path = command = NULL;
+    cnt = at = all = byword = dir = 0;
     x = y = SIZE = -1;
     cur = strtok(Input, "-");
     command = cur;
@@ -409,14 +527,14 @@ void Digest()
     {
         /*printf("now cur is : %s\n", cur);
         FLUSH;*/
-        if(!(_file() || _size() || _pos() || _str() || _flag()))
+        if(!(_file() || _size() || _pos() || _str() || _flag() || _atallbyword()))
         {
             INVALID;
             break;
         }
         cur = strtok(NULL, "-");
     }
-    printf("path = %s str = %s command = %s x = %d y = %d SIZE = %d dir = %d\n", path, str, command, x, y, SIZE, dir);
+    // printf("path = %s str = %s command = %s x = %d y = %d SIZE = %d dir = %d\n", path, str, command, x, y, SIZE, dir);
     FLUSH;
 }
 
@@ -429,10 +547,15 @@ int main()
     {
         printf("> ");
         scanf("%[^\n]%*c", Input);
-        /*printf("this is the input:\n%s\n", Input);
-        FLUSH;*/
+        /* printf("this is the input:\n%s\n", Input);
+        FLUSH; */
         Digest();
-        if (E(command, "createfile"))     /// createfile -file <addresss/name>
+        if(at && all)
+        {
+            INVALID;
+            continue;
+        }
+        if (E(command, "createfile"))
         {
             createfile();
         }
@@ -448,26 +571,50 @@ int main()
         {
             removestr();
         }
-        else if (E(command, "copy"))
+        else if (E(command, "copystr"))
         {
-            // copystr();
+            copystr();
         }
-        else if (E(command, "cut"))
+        else if (E(command, "cutstr"))
         {
-            // cutstr();
+            cutstr();
         }
         else if (E(command, "pastestr"))
         {
-            // pastestr();
+            pastestr();
         }
         else if (E(command, "find"))
         {
-            // find();
+            find();
+        }
+        else if (E(command, "replace"))
+        {
+            // replace()
+        }
+        else if (E(command, "grep"))
+        {
+            // grep()
+        }
+        else if (E(command, "undo"))
+        {
+            // undo();
+        }
+        else if (E(command, "auto"))
+        {
+            // auto();
+        }
+        else if (E(PRE(7, Input), "compare"))
+        {
+            // Compare();
+        }
+        else if (E(command, "exit"))
+        {
+            break;
         }
         else
         {
-            // INVALID;
+            INVALID;
         }
-    } while (E(command, "exit"));
+    } while (1);
     return 0;
 }
