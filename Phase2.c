@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <ncurses.h>
 #include "MYLIB.h"
 
 int main()
