@@ -166,7 +166,7 @@ int Main_sz;
 
 char *cur, *command, *path, *str, *str2;
 
-int at, all, byword, cnt, x, y, dir, SIZE;
+int flagc, flagl, at, all, byword, cnt, x, y, dir, SIZE;
 
 /// Working with Directory and CWD
 
@@ -567,6 +567,7 @@ void grep()
         }
         arr[i] += (int)(str[arr[i]] == str[i]);
     }
+    int ret = 0;
     char* CUR = strtok(path, " ");
     while(CUR != NULL)
     {
@@ -579,10 +580,12 @@ void grep()
                 return;
             }
             char s[N2] = {"\0"};
+            char LINE[N2] = {"\0"};
             READ(s, FIX2(now));
             int j = 0;
             for(int i = 0; i < SZ(s); i ++)
             {
+                LINE[SZ(LINE)] = s[i];
                 while(j && s[i] != str[j])
                 {
                     j = arr[j - 1];
@@ -590,12 +593,28 @@ void grep()
                 j += (s[i] == str[j]);
                 if(j == SZ(str))
                 {
-                    printf("Found Match i = %d file : %s\n", i, now);
+                    ret ++;
+                    if(flagc == 0 && flagl == 0) printf("Found Match i = %d file : %s line = %s\n", i, now, LINE);
+                    if(flagl)
+                    {
+                        printf("Match found : %s\n", now);
+                    }
                     j = 0;
+                }
+                if(s[i] == '\n')
+                {
+                    while(SZ(LINE))
+                    {
+                        LINE[SZ(LINE) - 1] = '\0';
+                    }
                 }
             }
         }
         CUR = strtok(NULL, " ");
+    }
+    if(flagc)
+    {
+        printf("glagc output : %d\n", ret);
     }
 }
 
@@ -734,6 +753,14 @@ int _flag()
         if(idk[0] == 'f')
         {
             dir = 1;
+        }
+        if(idk[0] == 'c')
+        {
+            flagc = 1;
+        }
+        if(idk[0] == 'l')
+        {
+            flagl = 1;
         }
         return 1;
     }
