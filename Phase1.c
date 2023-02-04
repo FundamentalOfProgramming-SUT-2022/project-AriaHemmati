@@ -164,10 +164,6 @@ void READ(char* s, char* S)
 
 int Main_sz;
 
-char *cur, *command, *path, *str, *str2;
-
-int flagc, flagl, at, all, byword, cnt, x, y, dir, SIZE;
-
 /// Working with Directory and CWD
 
 int GET()
@@ -197,7 +193,7 @@ void Go_Main()
 void Go_Path(char* s)
 {
     Go_Main();
-    cur = strtok(s, "/");
+    char* cur = strtok(s, "/");
     while(cur != NULL)
     {
         mkdir(cur, S_IRWXU);
@@ -225,7 +221,7 @@ int exist_path(char* s)
     return 0;
 }
 
-void createfile()
+void createfile(char* path)
 {
     if(!Valid(path))
     {
@@ -279,7 +275,7 @@ int Index(char* s, int A, int B)
     return ptr;
 }
 
-void insertstr()
+void insertstr(char* path, int x, int y, char* str)
 {
     if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || str == NULL)
     {
@@ -303,7 +299,7 @@ void insertstr()
 
 /// cat
 
-void cat()
+void cat(char* path)
 {
     if(!Valid(path) || !exist_path(path))
     {
@@ -317,7 +313,7 @@ void cat()
 
 /// removestr
 
-void removestr()
+void removestr(char* path, int x, int y, int dir, int SIZE)
 {
     char* Path = FIX2(path);
     if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1)
@@ -350,7 +346,7 @@ void removestr()
 
 /// copy paste cut
 
-void copystr()
+void copystr(char* path, int x, int y, int dir, int SIZE)
 {
     char* Path = FIX2(path);
     if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || dir == 0 || SIZE == -1)
@@ -375,13 +371,13 @@ void copystr()
     fclose(f);
 }
 
-void cutstr()
+void cutstr(char* path, int x, int y, int dir, int SIZE)
 {
-    copystr();
-    removestr();
+    copystr(path, x, y, dir, SIZE);
+    removestr(path, x, y, dir, SIZE);
 }
 
-void pastestr()
+void pastestr(char* path, int x, int y)
 {
     char* Path = FIX2(path);
     if(!Valid(path) || !exist_path(path) || x == -1 || y == -1)
@@ -391,16 +387,16 @@ void pastestr()
     }
     char* s = calloc(N2, sizeof (char));
     READ(s, "Clip.txt");
-    str = s;
-    insertstr();
+    char* str = s;
+    insertstr(path, x, y, str);
 }
 
 /// find, replace, undo
 
-void find()
+void find(char* path, char* str, int byword, int at, int all, int cnt)
 {
     char* Path = FIX2(path);
-    if(!(Valid(path) || !exist_path(path) || str == NULL))
+    if(!Valid(path) || !exist_path(path) || str == NULL)
     {
         INVALID;
         return;
@@ -474,10 +470,10 @@ void find()
     return;
 }
 
-void replace()
+void replace(char* path, char* str, char* str2, int at, int all)
 {
     char* Path = FIX2(path);
-    if(!(Valid(path) || !exist_path(path) || str == NULL || str2 == NULL))
+    if(!Valid(path) || !exist_path(path) || str == NULL || str2 == NULL)
     {
         INVALID;
         return;
@@ -532,7 +528,7 @@ void replace()
     fclose(f);
 }
 
-void undo()
+void undo(char* path)
 {
     char* Path = FIX2(path);
     if(!Valid(path) || !exist_path(path))
@@ -549,7 +545,7 @@ void undo()
 
 /// grep
 
-void grep()
+void grep(char* path, char* str, int flagl, int flagc)
 {
     if(str == NULL)
     {
@@ -620,7 +616,7 @@ void grep()
 
 /// auto indent
 
-void auto_indent()
+void auto_indent(char* path)
 {
     char* Path = FIX2(path);
     if(!Valid(path) || !exist_path(path))
@@ -675,6 +671,10 @@ void auto_indent()
 }
 
 /// Digesting the input to known elements
+
+char *cur, *command, *path, *str, *str2;
+
+int flagc, flagl, at, all, byword, cnt, x, y, dir, SIZE;
 
 int _file()
 {
@@ -832,51 +832,51 @@ void Digest()
     }
     if (E(command, "createfile"))
     {
-        createfile();
+        createfile(path);
     }
     else if (E(command, "insertstr"))
     {
-        insertstr();
+        insertstr(path, x, y, str);
     } 
     else if (E(command, "cat"))
     {
-        cat();
+        cat(path);
     }
     else if (E(command, "removestr"))
     {
-        removestr();
+        removestr(path, x, y, dir, SIZE);
     }
     else if (E(command, "copystr"))
     {
-        copystr();
+        copystr(path, x, y, dir, SIZE);
     }
     else if (E(command, "cutstr"))
     {
-        cutstr();
+        cutstr(path, x, y, dir, SIZE);
     }
     else if (E(command, "pastestr"))
     {
-        pastestr();
+        pastestr(path, x, y);
     }
     else if (E(command, "find"))
     {
-        find();
+        find(path, str, byword, at, all, cnt);
     }
     else if (E(command, "replace"))
     {
-        replace();
+        replace(path, str, str2, at, all);
     }
     else if (E(command, "grep"))
     {
-        grep();
+        grep(path, str, flagl, flagc);
     }
     else if (E(command, "undo"))
     {
-        undo();
+        undo(path);
     }
     else if (E(command, "aut"))
     {
-        auto_indent();
+        auto_indent(path);
     }
     else if (E(command, "exi"))
     {

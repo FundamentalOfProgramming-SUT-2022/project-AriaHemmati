@@ -1,28 +1,28 @@
 createfile -file /root/dir1/dir2/file.txt -pos 100:17 -str "Hello I'm Here" -str "Hello I've Here" -size 17824
 
 
-createfile -file /root/dir1/dir2/file.txt
+createfile -file /root/T1/T2/file.txt
 
-insertstr -file /root/dir1/dir2/file.txt -str "Hello World!" -pos 2:5 
+insertstr -file /root/T1/T2/file.txt -str "Hello World!" -pos 2:5 
 
-cat -file /root/dir1/dir2/file.txt
+cat -file /root/T1/T2/file.txt
 
-removestr -file /root/dir1/dir2/file.txt -pos 2:5 -size 4 -b
+removestr -file /root/T1/T2/file.txt -pos 2:5 -size 4 -b
 
-copystr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
+copystr -file /root/T1/T2/file.txt -pos 2:8 -size 4 -b
 
-cutstr -file /root/dir1/dir2/file.txt -pos 2:8 -size 4 -b
+cutstr -file /root/T1/T2/file.txt -pos 2:8 -size 4 -b
 
-pastestr -file /root/dir1/dir2/file.txt -pos 2:5
+pastestr -file /root/T1/T2/file.txt -pos 2:5
 
-find -str "a" -file /root/dir1/dir2/file.txt -all -byword
+find -str "a" -file /root/T1/T2/file.txt -all -byword
 
-find -str "a" -file /root/dir1/dir2/file.txt -at 6
+find -str "a" -file /root/T1/T2/file.txt -at 6
 
-replace -str1 "a" -str2 "cumlord" -file /root/dir1/dir2/file.txt -at 3
+replace -str1 "a" -str2 "cumlord" -file /root/T1/T2/file.txt -at 3
 
-undo -file /root/dir1/dir2/file.txt
+undo -file /root/T1/T2/file.txt
 
-grep -files /root/test1/test2/file.txt /root/test1/test2/file2.txt -str "Hey"
+grep -files /root/T1/T2/file.txt /root/test1/test2/file2.txt -str "Hey"
 
 auto-indent /root/test1/test2/file.txt
