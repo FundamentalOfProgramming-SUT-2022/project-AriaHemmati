@@ -121,6 +121,16 @@ char* CLONE(char* s)
     return ret;
 }
 
+char* STRFROM(int x, char c)
+{
+    char* ret = calloc(x + 1, sizeof (char));
+    for(int i = 0; i < x; i ++)
+    {
+        ret[i] = c;
+    }
+    return ret;
+}
+
 int TO_INT(char* s)
 {
     int n = SZ(s);
@@ -134,9 +144,9 @@ int TO_INT(char* s)
     return ret;
 }
 
-void READ(char* s, char* path)
+void READ(char* s, char* S)
 {
-    FILE* f = fopen(path, "r");
+    FILE* f = fopen(S, "r");
     char c;
     while(1)
     {
@@ -413,7 +423,7 @@ void find()
     int Words = 0, flag = 0, j = 0;
     for(int i = 0; i < SZ(s); i ++)
     {
-        while(j && str[j] != s[i])
+        while(j && (str[j] != s[i]))
         {
             j = arr[j - 1];
         }
@@ -482,7 +492,7 @@ void replace()
     for(int i = 1; i < n; i ++)
     {
         arr[i] = arr[i - 1];
-        while(arr[i] && str[arr[i]] != str[i])
+        while(arr[i] && (str[arr[i]] != str[i]))
         {
             arr[i] = arr[arr[i] - 1];
         }
@@ -497,7 +507,7 @@ void replace()
     for(int i = 0; i < SZ(s); i ++)
     {
         strncat(ret, &s[i], 1);
-        while(j && str[j] != s[i])
+        while(j && (str[j] != s[i]))
         {
             j = arr[j - 1];
         }
@@ -537,15 +547,121 @@ void undo()
     fclose(f);
 }
 
+/// grep
+
+void grep()
+{
+    if(str == NULL)
+    {
+        INVALID;
+        return;
+    }
+    int arr[N] = {0};
+    int ptr = 0, n = SZ(str);
+    for(int i = 1; i < n; i ++)
+    {
+        arr[i] = arr[i - 1];
+        while(arr[i] && str[arr[i]] != str[i])
+        {
+            arr[i] = arr[arr[i] - 1];
+        }
+        arr[i] += (int)(str[arr[i]] == str[i]);
+    }
+    char* CUR = strtok(path, " ");
+    while(CUR != NULL)
+    {
+        char* now = FIX(CUR);
+        if(!E(now, ""))
+        {
+            if(!Valid(now) || !exist_path(now))
+            {
+                INVALID;
+                return;
+            }
+            char s[N2] = {"\0"};
+            READ(s, FIX2(now));
+            int j = 0;
+            for(int i = 0; i < SZ(s); i ++)
+            {
+                while(j && s[i] != str[j])
+                {
+                    j = arr[j - 1];
+                }
+                j += (s[i] == str[j]);
+                if(j == SZ(str))
+                {
+                    printf("Found Match i = %d file : %s\n", i, now);
+                    j = 0;
+                }
+            }
+        }
+        CUR = strtok(NULL, " ");
+    }
+}
+
+/// auto indent
+
+void auto_indent()
+{
+    char* Path = FIX2(path);
+    if(!Valid(path) || !exist_path(path))
+    {
+        INVALID;
+        return;
+    }
+    char s[N2] = {"\0"};
+    char ret[N2] = {"\0"};
+    READ(s, Path);
+    int T = 0;
+    for(int i = 0; i < SZ(s); i ++)
+    {
+        if(s[i] == '{')
+        {
+            strcat(ret, "\n");
+            strcat(ret, STRFROM(4 * T, ' '));
+            strcat(ret, "{\n");
+            strcat(ret, STRFROM(4 * T + 4, ' '));
+            T ++;
+        }
+        else if(s[i] == '}')
+        {
+            T --;
+            strcat(ret, "\n");
+            strcat(ret, STRFROM(4 * T, ' '));
+            strcat(ret, "}\n");
+            strcat(ret, STRFROM(4 * T, ' '));
+            if(T < 0)
+            {
+                printf("Not correct sequence for auto-indent :(\n");
+                return;
+            }
+        }
+        else
+        {
+            strcat(ret, STRFROM(1, s[i]));
+            if(s[i] == '\n')
+            {
+                strcat(ret, STRFROM(4 * T, ' '));
+            }
+        }
+    }
+    if(T != 0)
+    {
+        printf("Not correct sequence for auto-indent :(\n");
+        return;
+    }
+    FILE *f = fopen(Path, "w");
+    fputs(ret, f);
+    fclose(f);
+}
+
 /// Digesting the input to known elements
 
 int _file()
 {
-    if(SZ(cur) >= 4 && E(PRE(4, cur), "file"))
+    if(SZ(cur) >= 5 && E(PRE(4, cur), "file"))
     {
-        /*printf("Ive maid it\n");
-        FLUSH;*/
-        cur += 4;
+        cur += 5;
         path = FIX(cur);
         return 1;
     }
@@ -653,6 +769,17 @@ int _atallbyword()
     return 0;
 }
 
+int _indent()
+{
+    if(SZ(cur) >= 6 && E(PRE(6, cur), "indent"))
+    {
+        cur += 6;
+        path = FIX(cur);
+        return 1;
+    }
+    return 0;
+}
+
 void Digest()
 {
     cur = str = str2 = path = command = NULL;
@@ -664,16 +791,13 @@ void Digest()
     cur = strtok(NULL, "-");
     while(cur != NULL)
     {
-        /*printf("now cur is : %s\n", cur);
-        FLUSH;*/
-        if(!(_file() || _size() || _pos() || _str() || _flag() || _atallbyword()))
+        if(!(_file() || _size() || _pos() || _str() || _flag() || _atallbyword() || _indent()))
         {
             INVALID;
             break;
         }
         cur = strtok(NULL, "-");
     }
-    // printf("path = %s str = %s command = %s x = %d y = %d SIZE = %d dir = %d\n", path, str, command, x, y, SIZE, dir);
     FLUSH;
 }
 
@@ -686,8 +810,6 @@ int main()
     {
         printf("> ");
         scanf("%[^\n]%*c", Input);
-        /* printf("this is the input:\n%s\n", Input);
-        FLUSH; */
         Digest();
         if(at && all)
         {
@@ -732,19 +854,15 @@ int main()
         }
         else if (E(command, "grep"))
         {
-            // grep();
+            grep();
         }
         else if (E(command, "undo"))
         {
             undo();
         }
-        else if (E(command, "auto"))
+        else if (E(command, "aut"))
         {
-            // auto();
-        }
-        else if (E(PRE(7, command), "compare"))
-        {
-            // Compare();
+            auto_indent();
         }
         else if (E(command, "exi"))
         {
