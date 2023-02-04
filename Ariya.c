@@ -805,7 +805,7 @@ void Digest()
 int main()
 {
     Main_sz = GET();
-    printf("Ariya's VIM   Powered by ~Kc~\n");
+    printf("Ariya's VIM   Powered by ~Kaycee~\n");
     do
     {
         printf("> ");
