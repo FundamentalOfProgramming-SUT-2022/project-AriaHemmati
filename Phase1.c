@@ -798,9 +798,68 @@ void Digest()
         }
         cur = strtok(NULL, "-");
     }
-    FLUSH;
+    if(at && all)
+    {
+        INVALID;
+        return;
+    }
+    if (E(command, "createfile"))
+    {
+        createfile();
+    }
+    else if (E(command, "insertstr"))
+    {
+        insertstr();
+    } 
+    else if (E(command, "cat"))
+    {
+        cat();
+    }
+    else if (E(command, "removestr"))
+    {
+        removestr();
+    }
+    else if (E(command, "copystr"))
+    {
+        copystr();
+    }
+    else if (E(command, "cutstr"))
+    {
+        cutstr();
+    }
+    else if (E(command, "pastestr"))
+    {
+        pastestr();
+    }
+    else if (E(command, "find"))
+    {
+        find();
+    }
+    else if (E(command, "replace"))
+    {
+        replace();
+    }
+    else if (E(command, "grep"))
+    {
+        grep();
+    }
+    else if (E(command, "undo"))
+    {
+        undo();
+    }
+    else if (E(command, "aut"))
+    {
+        auto_indent();
+    }
+    else if (E(command, "exi"))
+    {
+        exit(0);
+    }
+    else
+    {
+        INVALID;
+    }
 }
-
 
 int main()
 {
@@ -811,67 +870,6 @@ int main()
         printf("> ");
         scanf("%[^\n]%*c", Input);
         Digest();
-        if(at && all)
-        {
-            INVALID;
-            continue;
-        }
-        if (E(command, "createfile"))
-        {
-            createfile();
-        }
-        else if (E(command, "insertstr"))
-        {
-            insertstr();
-        } 
-        else if (E(command, "cat"))
-        {
-            cat();
-        }
-        else if (E(command, "removestr"))
-        {
-            removestr();
-        }
-        else if (E(command, "copystr"))
-        {
-            copystr();
-        }
-        else if (E(command, "cutstr"))
-        {
-            cutstr();
-        }
-        else if (E(command, "pastestr"))
-        {
-            pastestr();
-        }
-        else if (E(command, "find"))
-        {
-            find();
-        }
-        else if (E(command, "replace"))
-        {
-            replace();
-        }
-        else if (E(command, "grep"))
-        {
-            grep();
-        }
-        else if (E(command, "undo"))
-        {
-            undo();
-        }
-        else if (E(command, "aut"))
-        {
-            auto_indent();
-        }
-        else if (E(command, "exi"))
-        {
-            break;
-        }
-        else
-        {
-            INVALID;
-        }
     } while (1);
     return 0;
 }
