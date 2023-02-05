@@ -326,7 +326,24 @@ int main()
                 if(myvim.mode == 0)
                 {
                     clear();
-                    Digest();
+                    int ret = Digest();
+                    if(ret == 1)
+                    {
+                        myvim.path = path;
+                        SHOW();
+                    }
+                    if(ret == 2)
+                    {
+                        myvim.saved = 1;
+                    }
+                    if(ret == 3)
+                    {
+                        createfile(path);
+                        FILE *f = fopen(FIX2(path), "w");
+                        fputs(FREAD(myvim.path), f);
+                        fclose(f);
+                        myvim.path = path;
+                    }
                     refresh();
                     while(SZ(Input))
                     {
@@ -364,6 +381,7 @@ int main()
             if(key == '~')
             {
                 pastestr(myvim.path, myvim.x + myvim.curx + 1, myvim.y + myvim.cury);
+                myvim.saved = 0;
                 SHOW();
                 continue;
             }
@@ -404,6 +422,7 @@ int main()
             {
                 removestr(myvim.path, myvim.curx + myvim.x + 1, myvim.cury + myvim.y, side, SIZE);
                 CLEARMARK();
+                myvim.saved = 0;
                 SHOW();
                 getch();
                 myvim.mode = 3;
@@ -414,6 +433,7 @@ int main()
             {
                 copystr(myvim.path, myvim.curx + myvim.x + 1, myvim.cury + myvim.y, side, SIZE);
                 CLEARMARK();
+                myvim.saved = 0;
                 SHOW();
                 getch();
                 myvim.mode = 3;
@@ -424,6 +444,7 @@ int main()
             {
                 cutstr(myvim.path, myvim.curx + myvim.x + 1, myvim.cury + myvim.y, side, SIZE);
                 CLEARMARK();
+                myvim.saved = 0;
                 SHOW();
                 getch();
                 myvim.mode = 3;

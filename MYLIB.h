@@ -817,9 +817,9 @@ int _indent()
     return 0;
 }
 
-void Digest()
+int Digest()
 {
-    if(SZ(Input) == 0) return;
+    if(SZ(Input) == 0) return 0;
     cur = str = str2 = path = command = NULL;
     cnt = at = all = byword = dir = 0;
     x = y = SIZE = -1;
@@ -838,8 +838,8 @@ void Digest()
     }
     if(at && all)
     {
-        // INVALID;
-        return;
+        INVALID;
+        return 0;
     }
     if (E(command, "createfile"))
     {
@@ -896,7 +896,19 @@ void Digest()
     }
     else if (E(command, "") || SZ(command) == 1)
     {
-        return;
+        return 0;
+    }
+    else if (E(command, "open"))
+    {
+        return 1;
+    }
+    else if (E(command, "save"))
+    {
+        return 2;
+    }
+    else if (E(command, "saveas"))
+    {
+        return 3;
     }
     else
     {
