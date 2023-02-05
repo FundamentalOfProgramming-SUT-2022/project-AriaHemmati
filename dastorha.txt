@@ -19,7 +19,7 @@ find -str "a" -file /root/T1/T2/file.txt -all -byword
 
 find -str "a" -file /root/T1/T2/file.txt -at 6
 
-replace -str1 "a" -str2 "cumlord" -file /root/T1/T2/file.txt -at 3
+replace -str1 "World" -str2 "cumlord" -file /root/T1/T2/file.txt -all
 
 undo -file /root/T1/T2/file.txt
 

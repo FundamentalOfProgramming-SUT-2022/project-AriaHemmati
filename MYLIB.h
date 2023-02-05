@@ -16,11 +16,14 @@ typedef long double         ld;
 
 #define F               first
 #define S               second
-#define INVALID         printf("Invalid Command\n")
+#define INVALID         printw("Invalid Command\n")
 #define N               (int)1e2 + 10
-#define N2              (int)1e3 + 10
+#define N2              (int)5e2 + 10
+#define N3              (int)1e5 + 10
 #define FLUSH           fflush(stdout)
 #define SZ(x)           (int)strlen(x)
+
+int MARK[N3];
 
 char Input[N], CWD[N];
 
@@ -44,7 +47,7 @@ void Ass(int condition)
 {
     if(condition == 0)
     {
-        printf("Assert is fucked up!");
+        printw("Assert is fucked up!");
     }
 }
 
@@ -103,7 +106,7 @@ char* FIX(char* s)
     Ass(l < n && r >= 0 && l <= r);
     if(s[l] == '"') l ++;
     if(s[r] == '"') r --;
-    /// printf("in fix : l = %d r = %d ret = %s\n", l, r, BAZE(l, r, s));
+    /// printw("in fix : l = %d r = %d ret = %s\n", l, r, BAZE(l, r, s));
     return BAZE(l, r, s);
 }
 
@@ -165,7 +168,7 @@ void READ(char* s, char* S)
 
 /// global variables unkown to the basic functions above
 
-int Main_sz;
+int Main_sz = 44;
 
 /// Working with Directory and CWD
 
@@ -178,7 +181,7 @@ int GET()
 void print_cwd()
 {
     GET();
-    printf("%s\n", CWD);
+    printw("%s\n", CWD);
 }
 
 void Go_Main()
@@ -186,8 +189,6 @@ void Go_Main()
     int sz = GET();
     while(sz > Main_sz)
     {
-        /*print_cwd();
-        FLUSH;*/
         chdir("..");
         sz = GET();
     }
@@ -203,8 +204,6 @@ void Go_Path(char* s)
         chdir(cur);
         cur = strtok(NULL, "/");
     }
-    ///printf("Go path checking\n");
-    ///print_cwd();
 }
 
 int Valid(char* s)
@@ -220,7 +219,6 @@ int exist_path(char* s)
         fclose(f);
         return 1;
     }
-    ///printf("here s = %s\n", s);
     return 0;
 }
 
@@ -233,7 +231,7 @@ void createfile(char* path)
     }
     if(exist_path(path))
     {
-        printf("this file already exists\n");
+        printw("this file already exists\n");
         return;
     }
     int ptr = SZ(path);
@@ -280,6 +278,7 @@ int Index(char* s, int A, int B)
 
 void insertstr(char* path, int x, int y, char* str)
 {
+    ///printw("path = %s\n", path);
     if(!Valid(path) || !exist_path(path) || x == -1 || y == -1 || str == NULL)
     {
         INVALID;
@@ -311,7 +310,7 @@ void cat(char* path)
     }
     char s[N2] = {"\0"};
     READ(s, FIX2(path));
-    printf("%s\n", s);
+    printw("%s\n", s);
 }
 
 /// removestr
@@ -383,15 +382,15 @@ void cutstr(char* path, int x, int y, int dir, int SIZE)
 void pastestr(char* path, int x, int y)
 {
     char* Path = FIX2(path);
-    if(!Valid(path) || !exist_path(path) || x == -1 || y == -1)
+    printw("path = %s\n", path);
+    if(!Valid(path) || !exist_path(Path) || x == -1 || y == -1)
     {
         INVALID;
         return;
     }
     char* s = calloc(N2, sizeof (char));
     READ(s, "Clip.txt");
-    char* str = s;
-    insertstr(path, x, y, str);
+    insertstr(path, x, y, s);
 }
 
 /// find, replace, undo
@@ -404,7 +403,7 @@ void find(char* path, char* str, int byword, int at, int all, int cnt)
         INVALID;
         return;
     }
-    ///printf("just checking all = %d at = %d cnt = %d byword = %d str = %s\n", all, at, cnt, byword, str);
+    ///printw("just checking all = %d at = %d cnt = %d byword = %d str = %s\n", all, at, cnt, byword, str);
     char s[N2] = {"\0"};
     READ(s, Path);
     int arr[N] = {0};
@@ -430,6 +429,13 @@ void find(char* path, char* str, int byword, int at, int all, int cnt)
         if(j == SZ(str))
         {
             ans[ptr ++] = (byword ? Words : i);
+            if(all || ptr == at)
+            {
+                for(int k = 0; k < SZ(str); k ++)
+                {
+                    MARK[i - k] = 1;
+                }
+            }
             j = 0;
         }
         if(s[i] != ' ' && s[i] != '\n')
@@ -444,32 +450,32 @@ void find(char* path, char* str, int byword, int at, int all, int cnt)
     }
     if(cnt)
     {
-        printf("Count : %d\n", ptr);
+        printw("Count : %d\n", ptr);
     }
-    if(at)
+    /*if(at)
     {
         if(at > ptr)
         {
-            printf("not enough matches :(  -1\n");
+            printw("not enough matches :(  -1\n");
         }
         else
         {
-            printf("%d\n", ans[at - 1]);
+            printw("%d\n", ans[at - 1]);
         }
         return;
-    }
-    if(all)
+    }*/
+    /*if(all)
     {
         for(int i = 0; i < ptr; i ++)
         {
-            printf("%d", ans[i]);
+            printw("%d", ans[i]);
             if(i + 1 != ptr)
             {
-                printf(", ");
+                printw(", ");
             }
         }
-        printf("\n");
-    }
+        printw("\n");
+    }*/
     return;
 }
 
@@ -529,6 +535,7 @@ void replace(char* path, char* str, char* str2, int at, int all)
     FILE *f = fopen(Path, "w");
     fputs(ret, f);
     fclose(f);
+    find(path, str2, 0, at, all, 0);
 }
 
 void undo(char* path)
@@ -593,10 +600,10 @@ void grep(char* path, char* str, int flagl, int flagc)
                 if(j == SZ(str))
                 {
                     ret ++;
-                    if(flagc == 0 && flagl == 0) printf("Found Match i = %d file : %s line = %s\n", i, now, LINE);
+                    if(flagc == 0 && flagl == 0) printw("Found Match i = %d file : %s line = %s\n", i, now, LINE);
                     if(flagl)
                     {
-                        printf("Match found : %s\n", now);
+                        printw("Match found : %s\n", now);
                     }
                     j = 0;
                 }
@@ -613,7 +620,7 @@ void grep(char* path, char* str, int flagl, int flagc)
     }
     if(flagc)
     {
-        printf("glagc output : %d\n", ret);
+        printw("flagc output : %d\n", ret);
     }
 }
 
@@ -650,7 +657,7 @@ void auto_indent(char* path)
             strcat(ret, STRFROM(4 * T, ' '));
             if(T < 0)
             {
-                printf("Not correct sequence for auto-indent :(\n");
+                printw("Not correct sequence for auto-indent :(\n");
                 return;
             }
         }
@@ -665,7 +672,7 @@ void auto_indent(char* path)
     }
     if(T != 0)
     {
-        printf("Not correct sequence for auto-indent :(\n");
+        printw("Not correct sequence for auto-indent :(\n");
         return;
     }
     FILE *f = fopen(Path, "w");
@@ -812,6 +819,7 @@ int _indent()
 
 void Digest()
 {
+    if(SZ(Input) == 0) return;
     cur = str = str2 = path = command = NULL;
     cnt = at = all = byword = dir = 0;
     x = y = SIZE = -1;
@@ -830,7 +838,7 @@ void Digest()
     }
     if(at && all)
     {
-        INVALID;
+        // INVALID;
         return;
     }
     if (E(command, "createfile"))
@@ -883,7 +891,12 @@ void Digest()
     }
     else if (E(command, "exi"))
     {
+        endwin();
         exit(0);
+    }
+    else if (E(command, "") || SZ(command) == 1)
+    {
+        return;
     }
     else
     {
